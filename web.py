@@ -1,3 +1,6 @@
+import requests
+from bs4 import BeautifulSoup
+
 import os
 import json
 import firebase_admin
@@ -34,8 +37,32 @@ def index():
     link += "<a href=/cup>擲茭</a><hr>"
     link += "<a href=/read>讀取Firestore資料(根據lab遞減排序，取前4)</a><br>"
     link += "<a href=/search>查詢老師研究室</a><hr>"
+    link += "<a href=/movie>查詢即將上映電影</a><hr>"
     return link
 
+@app.route("/movie")
+def movie():
+    url = "https://www.atmovies.com.tw/movie/next/"
+    data = requests.get(url)
+    data.encoding = "utf-8"
+    sp = BeautifulSoup(data.text, "html.parser")
+    result = sp.select(".filmListAllX li")
+    
+    R = "<h1>即將上映電影清單</h1>"
+    for item in result:
+        try:
+            # 抓取電影名稱 (從 img 的 alt 屬性)
+            name = item.find("img").get("alt")
+            # 抓取超連結
+            href = "https://www.atmovies.com.tw" + item.find("a").get("href")
+            R += f"電影名稱：{name}<br>"
+            R += f"介紹連結：<a href='{href}' target='_blank'>{href}</a><br><br>"
+        except:
+            continue
+            
+    R += "<br><a href='/'>回到首頁</a>"
+    return R
+    
 @app.route("/read")
 def read():
     db = firestore.client()
@@ -89,6 +116,20 @@ def search():
 @app.route("/mis")
 def course():
     return "<h1>資訊管理導論</h1><a href=/>回到網站首頁</a>"
+
+@app.route("/spider1")
+def spider1():
+    R = ""
+    url = "https://wwc2026a.vercel.app/about"
+    Data = requests.get(url)
+    Data.encoding = "utf-8"
+    #print(Data.text)
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result=sp.select("td a")
+
+    for item in result:
+        R += item.text + "<br>" + item.get("href") + "<br><br>"
+    return R
 
 @app.route("/today")
 def today():
