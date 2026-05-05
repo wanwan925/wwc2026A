@@ -40,7 +40,68 @@ def index():
     link += "<a href=/movie>查詢即將上映電影</a><hr>"
     link += "<a href=/movie2>讀取開眼電影即將上映影片，寫入Firestore</a><hr>"
     link += "<a href=/searchQ>片名關鍵字查詢資料</a><hr>"
+    link += "<a href=/road>易肇事路口排行榜</a><hr>"
+    link += "<a href=/weather>縣市天氣查詢</a><hr>"
     return link
+
+@app.route("/road")
+def road():
+    R = ""
+    url = "https://newdatacenter.taichung.gov.tw/api/v1/no-auth/resource.download?rid=a1b899c0-511f-4e3d-b22b-814982a97e41"
+    Data = requests.get(url)
+    #print(Data.text)
+
+    JsonData = json.loads(Data.text)
+    for item in JsonData:
+        R += item["路口名稱"] + ",總共發生" + item["總件數"] + "件事故<br>"
+    return R
+
+@app.route("/weather", methods=["GET", "POST"])
+def weather():
+    if request.method == "POST":
+        city = request.form["city"].replace("台", "臺") # 統一轉換成「臺」
+        # 使用氣象署不需要授權碼的網頁 JSON 來源 (部分公開路徑)
+        # 若連此連結也失效，建議使用 BeautifulSoup 爬取官網
+        url = "https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON"
+       
+        try:
+            # 嘗試讀取資料
+            Data = requests.get(url)
+            JsonData = json.loads(Data.text)
+           
+            # 找到對應的縣市
+            locations = JsonData["cwaopendata"]["dataset"]["location"]
+            target_location = None
+            for loc in locations:
+                if loc["locationName"] == city:
+                    target_location = loc
+                    break
+           
+            if target_location:
+                # 天氣現象
+                weather_state = target_location["weatherElement"][0]["time"][0]["parameter"]["parameterName"]
+                # 降雨機率
+                rain_chance = target_location["weatherElement"][1]["time"][0]["parameter"]["parameterName"]
+               
+                res = f"<h2>{city} 目前天氣預報</h2>"
+                res += f"天氣狀況：{weather_state}<br>"
+                res += f"降雨機率：{rain_chance}%<br>"
+                res += "<br><a href='/weather'>重新查詢</a> | <a href='/'>回首頁</a>"
+                return res
+            else:
+                return f"查無 '{city}' 的資料。請輸入完整縣市名（如：臺中市）。<br><a href='/weather'>返回</a>"
+               
+        except Exception as e:
+            return f"資料讀取失敗，原因：{str(e)}<br><a href='/weather'>返回</a>"
+    else:
+        return """
+            <form method='post'>
+                縣市天氣查詢（如：臺中市）：<br>
+                <input type='text' name='city'>
+                <button type='submit'>查詢天氣</button>
+            </form>
+            <br><a href='/'>回首頁</a>
+        """
 
 @app.route("/movie")
 def movie():
