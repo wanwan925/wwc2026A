@@ -43,6 +43,7 @@ def index():
     link += "<a href=/rate>本週新片進DB</a><hr>"
     link += "<a href=/road>易肇事路口排行榜</a><hr>"
     link += "<a href=/weather>縣市天氣查詢</a><hr>"
+    link += "<a href=/demo>聊天機器人</a><hr>"
     return link
 
 @app.route("/demo")
@@ -69,6 +70,7 @@ def webhook():
             dict = doc.to_dict()
             if rate in dict["rate"]:
                 result += "片名：" + dict["title"] + "\n"
+                result += "介紹：" + dict["hyperlink"] + "\n\n"
         info += result
     return make_response(jsonify({"fulfillmentText": info}))
 
