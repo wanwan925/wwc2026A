@@ -86,6 +86,10 @@ def ask():
 def demo():
     return render_template("demo.html")
 
+@app.route("/messenger")
+def messenger():
+    return render_template("messenger.html")
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
     # build a request object
