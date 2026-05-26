@@ -45,6 +45,7 @@ def index():
     link += "<a href=/road>易肇事路口排行榜</a><hr>"
     link += "<a href=/weather>縣市天氣查詢</a><hr>"
     link += "<a href=/demo>聊天機器人</a><hr>"
+    link += "<a href=/AI>Gemini</a><hr>"
     return link
 
 client = genai.Client()
