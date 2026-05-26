@@ -46,6 +46,7 @@ def index():
     link += "<a href=/weather>縣市天氣查詢</a><hr>"
     link += "<a href=/demo>聊天機器人</a><hr>"
     link += "<a href=/AI>Gemini</a><hr>"
+    link += "<a href=/ask>詢問Gemini</a><hr>"
     return link
 
 client = genai.Client()
@@ -60,6 +61,25 @@ def AI():
     
     # 回傳生成的文字
     return response.text
+
+@app.route('/ask', methods=['GET', 'POST']) 
+def ask():
+    if request.method == "POST":
+        user_prompt = request.form.get('prompt', '')
+        if not user_prompt:
+            return "請輸入內容", 400
+        try:
+            response = client.models.generate_content(
+                model='gemini-3.5-flash',
+                contents=user_prompt,
+            )
+            return response.text
+        except Exception as e:
+            return f"發生錯誤: {str(e)}", 500
+
+    else:    
+        # 當使用者直接打開網頁 (GET) 時，顯示輸入框畫面
+        return render_template("ask.html")
 
 @app.route("/demo")
 def demo():
