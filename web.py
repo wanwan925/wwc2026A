@@ -109,7 +109,16 @@ def webhook():
         info += result
 
     elif (action == "input.unknown"):
-        info =  req["queryResult"]["queryText"]
+        #info =  req["queryResult"]["queryText"]
+
+            # 每次使用者拜訪該路徑時，直接使用全域的 client 呼叫模型
+        response = client.models.generate_content(
+            model='gemini-3.5-flash',
+            contents=req["queryResult"]["queryText"],
+        )
+    
+        # 回傳生成的文字
+        info = response.text
 
     return make_response(jsonify({"fulfillmentText": info}))
 
