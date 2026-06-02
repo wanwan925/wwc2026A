@@ -124,7 +124,7 @@ def webhook():
 
             # 每次使用者拜訪該路徑時，直接使用全域的 client 呼叫模型
         response = client.models.generate_content(
-            model='gemini-3.5-flash',
+            model='gemini-3.1-flash-lite',
             contents=req["queryResult"]["queryText"],
             config=ai_config,
         )
